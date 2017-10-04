@@ -67,8 +67,8 @@ class Ant(object):
 
 
 class AntColony(object):
-    def __init__(self,num_ants=25,alpha=1, beta=0.1):
-        self._graph = nx.Graph() 
+    def __init__(self,num_ants=25,alpha=1, beta=0.1,graph_file=None):
+        self._graph = self._init_graph(graph_file) 
 
         self._iteration = 0
         self._ants = num_ants
@@ -83,6 +83,23 @@ class AntColony(object):
         This function initialises ants in the colony 
         """
         return -1
+
+    def _init_graph(self, graph_file=None):
+        """
+        How the graph is constructed:
+
+        graph = nx.Graph() initialises an empty graph
+        graph.add_node(1) will add '1' to the graph
+
+        For our purposes, we can also add other attributes
+        graph.add_node(1,coord=(45,60),demand=17)
+
+        We then access nodes and their coordinates like this: 
+        >>  In[1]: graph.node[1]
+        >> Out[1]: {'coord':(45,60), 'demand':17}
+        """
+        return -1 
+
 
     def global_pheremone_update(self):
         """
