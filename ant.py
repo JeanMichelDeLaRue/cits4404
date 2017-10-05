@@ -2,6 +2,7 @@
 Python implementation of Ant Colony Optimisation (ACO) meta-heuristic, for course requirements of CITS4404 @ University of Western Australia
 """
 import random 
+import math
 import networkx as nx
 
 """
@@ -41,9 +42,10 @@ What we need to represent:
         
 class Ant(object): 
 
-    def __init__(self, target):
+    def __init__(self, depot=(0,0),capactiy=10):
         self._solution = nx.Graph() # This is an empty graph
         self._previous = None
+        self._depot = depot
 
     def __repr__(self):
         return self._solution.nodes()
@@ -53,35 +55,38 @@ class Ant(object):
         return self._solution  
     # def 
 
-    def update_solution(self, new_node,distance=None):
+    def update_solution(self, new_node):
         if not self._previous:
             self._previous = new_node
             self._solution.add_node(new_node)
         else:
             self._solution.add_node(new_node)
-            self._solution.add_edge(self._previous,new_node,weight=distance)
+            self._solution.add_edge(self._previous,new_node)
             self._previous = new_node
+
 
     def fitness_selection(self):
         return -1
 
 
 class AntColony(object):
-    def __init__(self,num_ants=25,alpha=1, beta=0.1,graph_file=None):
-        self._graph = self._init_graph(graph_file) 
-
+    def __init__(self,num_ants=5,alpha=1, beta=0.1,graph_file=None):
+        self._graph = None
         self._iteration = 0
         self._ants = num_ants
         self._colony = []
+
+        self._q0 = 0.9 # most of the time, we use the pheromone
         self._alpha = alpha
         self._beta = beta
-        self._pheremone_decay = 0.8
-
+        self._pheromone_decay = 0.8
+        self._unvisted_customers = None        
 
     def _init_ants(self):
         """
         This function initialises ants in the colony 
         """
+
         return -1
 
     def _init_graph(self, graph_file=None):
@@ -98,46 +103,75 @@ class AntColony(object):
         >>  In[1]: graph.node[1]
         >> Out[1]: {'coord':(45,60), 'demand':17}
         """
-        return -1 
+
+        # TODO - Read in the graph from the CSV file
+
+        # CONSTRUCT A TEMPORARY, SMALL GRAPH
+
+        self._graph = nx.Graph()
+        self._graph.add_nodes_from([1,2,3,4]) 
+        coords = [(45,60),(-45,60),(45,-60),(-45,-60)]
+        demand = [4,5,6,7]
+        for x in range(1,5):
+            self._graph.node[x]['coord']=coords[x-1]
+            self._graph.node[x]['demand'] = demand[x-1]
+
+        self._unvisted_customers = list(self._graph.nodes())
+
+        return self._graph 
 
 
-    def global_pheremone_update(self):
+    def global_pheromone_update(self):
         """
-        This function decays the pheremones on the trail
+        This function decays the pheromones on the trail
         """
         return -1 
+
+    def distance(self, c1, c2):
+        """
+        Calculate the distance between the coordinates of 2 vertices
+        :param c1: The coordinate tuple of the first vertex
+        :param c2: The coordinate tuple of the second vertex
+        """
+
+        c1x,c1y = c1
+        c2x,c2y = c2
+
+        dist = math.sqrt(pow((c2x-c1x),2) + pow((c2y-c1y),2))
+
+        return int(dist)
 
     def run(self):
         if not self._colony:
             self._init_ants()
+        if not self._graph:
+            self._init_graph()
 
-        """
-        Running the simulations follows the following structure:
-        1. Each ant constructs a solution
-        2. Ants lay pheremones on the solution path
-        3. After all pheremones are laid, we evaporate according to the evaporation rate
-        """ 
+        for ant in self._colony:
+            soln = ant.get_solution()
+            while len(soln) < len(self._graph):
+                for customer in self._unvisted_customers:
+                    # What variables we need
+                    edge_pheromone = - 1
+                    inverse_distance = -1 
+                    self._beta 
+                    q = random.random()
+
+
+
         return -1  
 
 
 if __name__ == "__main__": 
-    # targetA = Target("A",5,5)
-    # targetB = Target("B",1,6)
-    # targetC = Target("C",7,8)
-
-    # grid.state()    
-
     aco = AntColony(10)
-    # aco.grid_state()
     aco.run()
     """
     TODO:
     Have the Ant colony 'run' over n iterations
         - Iteration starts from ant colony object
-        - ants are initialised to random city from the grid
         - The approach to finding a path between each moving target 
         can just involve randomly grabbing a target and adding it as a node to the graph  
-        -  likewise, pheremones can just be the actual distance (pheremones become edge weights on the graph)
+        -  likewise, pheromones can just be the actual distance (pheromones become edge weights on the graph)
         -  each iteration means that the targets move - update these targets each iteration 
         - display final results
 
