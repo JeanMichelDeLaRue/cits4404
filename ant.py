@@ -17,28 +17,6 @@ What we need to represent:
     - The number of iterations
     - {Optional} Maxmimum length travelled by an ant [Ant Class]
 """
-
-# class Target(object):
-
-#     def __init__(self,tid, xinit, yinit):
-#         self._tid = tid self._init_pos = (xinit, yinit)
-#         self._current_pos = (xinit,yinit)
-#         self._velocity = (random.randint(1,xinit),random.randint(1,yinit)) 
-
-#     def __repr__(self):
-#         return self._tid
-
-#     def current_position(self):
-#         return self._current_pos
-
-#     def velocity(self):
-#         return self._velocity
-
-#     def update_position(self,x,y,gridx,gridy,iteration):
-#         """
-#         We need to update the position of the target after an iteration
-#         """
-#         return -1 
         
 class Ant(object): 
 
