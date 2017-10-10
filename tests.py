@@ -39,3 +39,6 @@ class TestAntColonyMethods(unittest.TestCase):
 
         retval = self.aco.distance(c1,c2)
         self.assertTrue(retval is 5)
+
+    def testPheromoneDist(self):
+        return -1
