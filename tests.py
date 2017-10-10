@@ -38,4 +38,6 @@ class TestAntColonyMethods(unittest.TestCase):
         c2 = (5,5)
 
         retval = self.aco.distance(c1,c2)
-        self.assertTrue(retval is 5)
+        self.assertFalse(retval is 7)
+
+    
