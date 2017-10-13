@@ -21,9 +21,9 @@ What we need to represent:
 class Ant(object): 
 
     def __init__(self, depot=(0,0),capactiy=10):
-        self._solution = nx.Graph() # This is an empty graph
-        self._previous = None
+        self._solution = None # This is an empty graph
         self._depot = depot
+        self._current = None
 
     def __repr__(self):
         return self._solution.nodes()
@@ -34,14 +34,18 @@ class Ant(object):
     # def 
 
     def update_solution(self, new_node):
-        if not self._previous:
-            self._previous = new_node
-            self._solution.add_node(new_node)
-        else:
-            self._solution.add_node(new_node)
-            self._solution.add_edge(self._previous,new_node)
-            self._previous = new_node
+        # Initialise the graph and add the depot to it; this should always happen the first time.
+        if not self._solution:
+            self._solution = nx.Graph()
+            self._solution.add_node(self._depot)
+            self._current = self._depot
 
+        self._solution.add_node(new_node)
+        self._solution.add_edge(self._current,new_node) 
+        self._current = new_node
+
+    def get_current_position(self):
+        return self._current
 
     def fitness_selection(self):
         return -1
@@ -50,6 +54,9 @@ class Ant(object):
 class AntColony(object):
     def __init__(self,num_ants=5,alpha=1, beta=0.1,graph_file=None):
         self._graph = None
+        self._graph.edges[(1,2)]
+        if self._graph.edge[(1,2)]:
+
         self._iteration = 0
         self._ants = num_ants
         self._colony = []
@@ -129,13 +136,14 @@ class AntColony(object):
             soln = ant.get_solution()
             while len(soln) < len(self._graph):
                 for customer in self._unvisted_customers:
+                    if not ant.get_solution:
+                        curren_pos = ant._depot
+                    tau = self._graph.edge[ant.current][customer]['pheremone']
                     # What variables we need
                     edge_pheromone = - 1
                     inverse_distance = -1 
                     self._beta 
                     q = random.random()
-
-
 
         return -1  
 
