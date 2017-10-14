@@ -20,13 +20,14 @@ What we need to represent:
         
 class Ant(object): 
 
-    def __init__(self, depot=(0,0),capactiy=10):
-        self._solution = None # This is an empty graph
+    def __init__(self,id, depot=(0,0),capactiy=10):
+        self._id = id
+        self._solution = nx.Graph() # This is an empty graph
         self._depot = depot
         self._current = None
 
     def __repr__(self):
-        return self._solution.nodes()
+        return self._id
 
 
     def get_solution(self):
@@ -45,6 +46,9 @@ class Ant(object):
         self._current = new_node
 
     def get_current_position(self):
+        if not self._current:
+            return 'depot'
+
         return self._current
 
     def fitness_selection(self):
@@ -54,12 +58,10 @@ class Ant(object):
 class AntColony(object):
     def __init__(self,num_ants=5,alpha=1, beta=0.1,graph_file=None):
         self._graph = None
-        self._graph.edges[(1,2)]
-        if self._graph.edge[(1,2)]:
-
         self._iteration = 0
         self._ants = num_ants
         self._colony = []
+        self._depot = (0,0)
 
         self._q0 = 0.9 # most of the time, we use the pheromone
         self._alpha = alpha
@@ -71,8 +73,10 @@ class AntColony(object):
         """
         This function initialises ants in the colony 
         """
+        for x in range(0,self._ants):
+            self._colony.append(Ant(x,self._depot,5))
 
-        return -1
+        return self._colony
 
     def _init_graph(self, graph_file=None):
         """
@@ -101,10 +105,19 @@ class AntColony(object):
             self._graph.node[x]['coord']=coords[x-1]
             self._graph.node[x]['demand'] = demand[x-1]
 
+        # The list of unvisited customers 
         self._unvisted_customers = list(self._graph.nodes())
 
-        return self._graph 
+        # Initialise all edges on the graph, set the pheromone to 0
+        self._graph.add_node('depot')
+        self._graph.node['depot']['coord']=self._depot
+        for node in self._graph:
+            for other_node in self._graph:
+                if other_node is not node:
+                    self._graph.add_edge(node,other_node,pheromone=0)
 
+
+        return self._graph 
 
     def global_pheromone_update(self):
         """
@@ -129,23 +142,24 @@ class AntColony(object):
     def run(self):
         if not self._colony:
             self._init_ants()
+            print("Successfully initialised ants")
         if not self._graph:
             self._init_graph()
-
+            print("Successfully initialised graph")
+        
         for ant in self._colony:
             soln = ant.get_solution()
             while len(soln) < len(self._graph):
                 for customer in self._unvisted_customers:
-                    if not ant.get_solution:
-                        curren_pos = ant._depot
-                    tau = self._graph.edge[ant.current][customer]['pheremone']
-                    # What variables we need
-                    edge_pheromone = - 1
-                    inverse_distance = -1 
-                    self._beta 
+                    ant_pos = ant.get_current_position()
+                    edge_pheromone = self._graph.edge[ant_pos][customer]['pheromone']
+                    customer_coord = self._graph.node[customer]['coord']
+                    ant_coord = self._graph.node[ant_pos]['coord']
+                    dist = self.distance(ant_coord,customer_coord) 
                     q = random.random()
+                    return [ant_coord,customer_coord,edge_pheromone,dist]
 
-        return -1  
+        return 0
 
 
 if __name__ == "__main__": 
