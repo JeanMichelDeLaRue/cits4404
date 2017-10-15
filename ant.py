@@ -152,7 +152,7 @@ class AntColony(object):
             while len(soln) < len(self._graph):
                 for customer in self._unvisted_customers:
                     ant_pos = ant.get_current_position()
-                    edge_pheromone = self._graph.edge[ant_pos][customer]['pheromone']
+                    edge_pheromone = self._graph[ant_pos][customer]['pheromone']
                     customer_coord = self._graph.node[customer]['coord']
                     ant_coord = self._graph.node[ant_pos]['coord']
                     dist = self.distance(ant_coord,customer_coord) 
