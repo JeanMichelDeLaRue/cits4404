@@ -58,7 +58,7 @@ class Ant(object):
 class AntColony(object):
     def __init__(self,num_ants=5,alpha=1, beta=0.1,graph_file=None):
         self._graph = None
-        self._iteration = 0
+        self._iteration = 1
         self._ants = num_ants
         self._colony = []
         self._depot = (0,0)
@@ -146,7 +146,7 @@ class AntColony(object):
         if not self._graph:
             self._init_graph()
             print("Successfully initialised graph")
-        
+
         for ant in self._colony:
             soln = ant.get_solution()
             while len(soln) < len(self._graph):
