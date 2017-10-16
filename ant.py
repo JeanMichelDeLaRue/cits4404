@@ -114,7 +114,7 @@ class AntColony(object):
         for node in self._graph:
             for other_node in self._graph:
                 if other_node is not node:
-                    self._graph.add_edge(node,other_node,pheromone=0)
+                    self._graph.add_edge(node,other_node,pheromone=5)
 
 
         return self._graph 
@@ -150,6 +150,8 @@ class AntColony(object):
         for ant in self._colony:
             soln = ant.get_solution()
             while len(soln) < len(self._graph):
+                best_customer = None
+                max_pheromone = 0 
                 for customer in self._unvisted_customers:
                     ant_pos = ant.get_current_position()
                     edge_pheromone = self._graph[ant_pos][customer]['pheromone']
@@ -157,8 +159,14 @@ class AntColony(object):
                     ant_coord = self._graph.node[ant_pos]['coord']
                     dist = self.distance(ant_coord,customer_coord) 
                     q = random.random()
-                    return [ant_coord,customer_coord,edge_pheromone,dist]
-
+                    if q < self._q0:
+                        print ("This is q: "), (q), (" compared to q0: "), (self._q0)
+                        prob_formula = (pow(edge_pheromone, self._alpha) * pow((1/dist), self._beta)) #funkar inte! /Mal
+                        print("This is Tau: "), (prob_formula)
+                        if  max_pheromone < prob_formula:
+                            max_pheromone = prob_formula
+                            next_customer = customer # or should it be new_node = customer_coord? / Mal
+                    return [ant_coord,customer_coord,edge_pheromone,dist, customer]  #maste fa den att loopa och printa formulan / Mal
         return 0
 
 
