@@ -8,10 +8,9 @@ import networkx as nx
 """
 We can represent things differently now that we have are moving 
 from the Moving Salesman to Vehicle Routing
-
 What we need to represent: 
     - The routing graph (networkx object) [ACO Class]
-    - The capacity of a vehicle (ant capactiy) [Ant Class]
+        - The capacity of a vehicle (ant capactiy) [Ant Class]
     - The number of vehicles (num_ants) [ACO Class]
     - The unvisted nodes [ACO Class]
     - The number of iterations
@@ -81,13 +80,10 @@ class AntColony(object):
     def _init_graph(self, graph_file=None):
         """
         How the graph is constructed:
-
         graph = nx.Graph() initialises an empty graph
         graph.add_node(1) will add '1' to the graph
-
         For our purposes, we can also add other attributes
         graph.add_node(1,coord=(45,60),demand=17)
-
         We then access nodes and their coordinates like this: 
         >>  In[1]: graph.node[1]
         >> Out[1]: {'coord':(45,60), 'demand':17}
@@ -160,12 +156,10 @@ class AntColony(object):
                     dist = self.distance(ant_coord,customer_coord) 
                     q = random.random()
                     if q < self._q0:
-                        print ("This is q: "), (q), (" compared to q0: "), (self._q0)
-                        prob_formula = (pow(edge_pheromone, self._alpha) * pow((1/dist), self._beta)) #funkar inte! /Mal
-                        print("This is Tau: "), (prob_formula)
+                        prob_formula = pow(edge_pheromone, self._alpha) * pow(1/float(dist), self._beta) #funkar inte! /Mal
                         if  max_pheromone < prob_formula:
                             max_pheromone = prob_formula
-                            next_customer = customer # or should it be new_node = customer_coord? / Mal
+                            next_customer = customer 
                     return [ant_coord,customer_coord,edge_pheromone,dist, customer]  #maste fa den att loopa och printa formulan / Mal
         return 0
 
@@ -182,7 +176,9 @@ if __name__ == "__main__":
         -  likewise, pheromones can just be the actual distance (pheromones become edge weights on the graph)
         -  each iteration means that the targets move - update these targets each iteration 
         - display final results
-
     """
+
+
+
 
 
