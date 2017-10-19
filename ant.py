@@ -126,7 +126,6 @@ class AntColony(object):
 
         """
         self._graph = nx.Graph()
-        self._unvisted_customers = list(self._graph.nodes())
 
         #Reading from CSV, fetching data
         data = []
@@ -153,7 +152,7 @@ class AntColony(object):
 
 
         for i in data:
-            self._graph.add_node(i["customer_id"],coord=(int(i["x_cord"]),int(i["y_cord"])),demand=i["demand"])
+            self._graph.add_node(i["customer_id"],coord=(int(i["x_cord"]),int(i["y_cord"])),demand=int(i["demand"]))
         
         #Here I am setting pheromone value to 5 as i not clear about the config/structure that we will follow 
         self._graph.add_node('depot')
@@ -163,6 +162,10 @@ class AntColony(object):
             for other_node in self._graph:
                 if other_node is not node:
                     self._graph.add_edge(node,other_node,pheromone=5)
+
+
+        self._unvisted_customers = list(self._graph.nodes())        
+        
         return self._graph
 
 
