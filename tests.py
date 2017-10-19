@@ -55,6 +55,11 @@ class TestAntColonyMethods(unittest.TestCase):
         customer1 = graph.node[customers[0]]
         self.assertTrue(customer1['coord'][1] is 60)
 
+    def testCSVParser(self):
+        graph = self.aco.csv_parser('example.csv')
+        self.assertTrue(graph.node['1']['coord'][0] is 40)
+        self.assertTrue(graph.node['1']['coord'][1] is 50)
+        self.assertTrue(graph.node['92']['demand'] is 10)
 
     def testRun(self):
         ret_list = self.aco.run()

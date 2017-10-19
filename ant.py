@@ -4,6 +4,7 @@ Python implementation of Ant Colony Optimisation (ACO) meta-heuristic, for cours
 import random 
 import math
 import networkx as nx
+import csv
 
 """
 We can represent things differently now that we have are moving 
@@ -115,6 +116,61 @@ class AntColony(object):
 
 
         return self._graph 
+
+
+    def csv_parser(self, graph_file=None):
+        """
+        graph_file = file path
+        its assumed that 1st row will be contianing labels
+        in order : CUST, NO.XCOORD., YCOORD.,DEMAND, READY TIME, DUE DATE, SERVICE TIME
+
+
+        """
+        self._graph = nx.Graph()
+
+        #Reading from CSV, fetching data
+        data = []
+        try:
+            with open(graph_file, 'rb') as csvfile:
+                csv_reader = csv.reader(csvfile, delimiter=',')
+
+                for i in csv_reader:
+                    if not i[1].isdigit():
+                        continue
+                    else:
+                        try:
+                            temp = {}
+                            temp["x_cord"] = i[1]
+                            temp["y_cord"] = i[2]
+                            temp["customer_id"] = i[0]
+                            temp["demand"] = i[3]
+                            data.append(temp)
+                        except Exception as err:
+                            pass                
+        except Exception as err:
+            
+            return -1
+
+
+        for i in data:
+            self._graph.add_node(i["customer_id"],coord=(int(i["x_cord"]),int(i["y_cord"])),demand=int(i["demand"]))
+        
+        #Here I am setting pheromone value to 5 as i not clear about the config/structure that we will follow 
+        self._graph.add_node('depot')
+        self._graph.node['depot']['coord']=self._depot
+
+        for node in self._graph:
+            for other_node in self._graph:
+                if other_node is not node:
+                    self._graph.add_edge(node,other_node,pheromone=5)
+
+
+        self._unvisted_customers = list(self._graph.nodes())        
+        
+        return self._graph
+
+
+
 
     def global_pheromone_update(self):
         """
