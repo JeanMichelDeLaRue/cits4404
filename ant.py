@@ -24,6 +24,7 @@ class Ant(object):
         self._solution = nx.Graph() # This is an empty graph
         self._depot = depot
         self._current = None
+        self.capacity =  10
 
     def __repr__(self):
         return self._id
@@ -96,7 +97,7 @@ class AntColony(object):
         self._graph = nx.Graph()
         self._graph.add_nodes_from([1,2,3,4]) 
         coords = [(45,60),(-45,60),(45,-60),(-45,-60)]
-        demand = [4,5,6,7]
+        demand = [4,5,12,7]
         for x in range(1,5):
             self._graph.node[x]['coord']=coords[x-1]
             self._graph.node[x]['demand'] = demand[x-1]
@@ -144,39 +145,55 @@ class AntColony(object):
             print("Successfully initialised graph")
 
         for ant in self._colony:
+            
             soln = ant.get_solution()
-            while len(soln) < len(self._graph):
-                best_customer = None
-                max_pheromone = 0 
-                for customer in self._unvisted_customers:
+            max_capacity = 10 # FIXA till detta sa du hamtar fran dar uppe! 
+            ant_capacity = max_capacity # galler for forsta iterationen, andra detta sa det hamtas fran andra capaciteten
+            possible_customers = []
+            best_customer = None
+            max_pheromone = 2 
+            
+            while len(self._unvisted_customers) != 0: 
+                for customer in self._unvisted_customers: 
+                    if self._graph.node[customer]['demand'] > ant_capacity:
+                        continue # This will skip this customer and go back to the for loop until we find a customer
+                    else: possible_customers.append(customer)            
+                print ("possible_customers: "), (possible_customers)
+
+                for customer in possible_customers:
+                    print ("Customer nr: "),(customer)
+                    print ("Customer's demand: "), (self._graph.node[customer]['demand'])
                     ant_pos = ant.get_current_position()
                     edge_pheromone = self._graph[ant_pos][customer]['pheromone']
                     customer_coord = self._graph.node[customer]['coord']
                     ant_coord = self._graph.node[ant_pos]['coord']
                     dist = self.distance(ant_coord,customer_coord) 
-                    q = random.random()
+                    q = random.random() 
+
                     if q < self._q0:
-                        prob_formula = pow(edge_pheromone, self._alpha) * pow(1/float(dist), self._beta) #funkar inte! /Mal
+                        print ("This is q: "), (q), ("compared to q0: "), (self._q0)
+                        prob_formula = pow(edge_pheromone, self._alpha) * pow(1/float(dist), self._beta) 
+                        print ("Tau: "), (prob_formula)
+                        print ("first max_pheromone"), (max_pheromone) 
+
                         if  max_pheromone < prob_formula:
                             max_pheromone = prob_formula
                             next_customer = customer 
-                    return [ant_coord,customer_coord,edge_pheromone,dist, customer]  #maste fa den att loopa och printa formulan / Mal
-        return 0
+                            print ("second max_pheromone"), (max_pheromone)
+                            print ("I picked this customer randomly"), (next_customer)
+                        else: continue  # 
+                    else: print "Lets play roulette instead!"
+                            #self._unvisted_customers.remove(customer) # kanska ska ta bort .self 
+                    
+                return [ant_coord,customer_coord,edge_pheromone,dist, next_customer]  
+            return 0
+            
 
 
 if __name__ == "__main__": 
     aco = AntColony(10)
     aco.run()
-    """
-    TODO:
-    Have the Ant colony 'run' over n iterations
-        - Iteration starts from ant colony object
-        - The approach to finding a path between each moving target 
-        can just involve randomly grabbing a target and adding it as a node to the graph  
-        -  likewise, pheromones can just be the actual distance (pheromones become edge weights on the graph)
-        -  each iteration means that the targets move - update these targets each iteration 
-        - display final results
-    """
+ 
 
 
 

@@ -36,7 +36,7 @@ class TestAntColonyMethods(unittest.TestCase):
         self.assertTrue(coord[0] is 45)
         self.assertTrue(graph.node['depot'])
         self.assertTrue(graph.node[2]['demand'] is 5)
-        self.assertTrue(graph[1][2]['pheromone'] is 0)
+        self.assertTrue(graph[1][2]['pheromone'] is 5)
         self.assertTrue(graph[2][1])
         self.assertTrue(graph[3][1])
 
