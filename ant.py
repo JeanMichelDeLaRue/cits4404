@@ -33,18 +33,19 @@ class Ant(object):
 
     def get_solution(self):
         return self._solution  
-    # def 
+    
 
-    def update_solution(self, new_node):
+    def update_solution(self, next_customer):
         # Initialise the graph and add the depot to it; this should always happen the first time.
         if not self._solution:
             self._solution = nx.Graph()
             self._solution.add_node(self._depot)
             self._current = self._depot
 
-        self._solution.add_node(new_node)
-        self._solution.add_edge(self._current,new_node) 
-        self._current = new_node
+        self._solution.add_node(next_customer)
+        self._solution.add_edge(self._current,next_customer) 
+        self._current = next_customer
+        
 
     def get_current_position(self):
         if not self._current:
@@ -62,7 +63,7 @@ class AntColony(object):
         self._iteration = 1
         self._ants = num_ants
         self._colony = []
-        self._depot = (0,0)
+        self._depot = (-1,0)
 
         self._q0 = 0.9 # most of the time, we use the pheromone
         self._alpha = alpha
@@ -203,15 +204,15 @@ class AntColony(object):
         for ant in self._colony:
             
             soln = ant.get_solution()
-            max_capacity = 10 # FIXA till detta sa du hamtar fran dar uppe! 
-            ant_capacity = max_capacity # galler for forsta iterationen, andra detta sa det hamtas fran andra capaciteten
+            # max_capacity = 10 # FIXA till detta sa du hamtar fran dar uppe! 
+            # ant_capacity = max_capacity # galler for forsta iterationen, andra detta sa det hamtas fran andra capaciteten
             possible_customers = []
             best_customer = None
-            max_pheromone = 2 
+            max_pheromone = -1 
             
             while len(self._unvisted_customers) != 0: 
                 for customer in self._unvisted_customers: 
-                    if self._graph.node[customer]['demand'] > ant_capacity:
+                    if self._graph.node[customer]['demand'] > ant.capacity:
                         continue # This will skip this customer and go back to the for loop until we find a customer
                     else: possible_customers.append(customer)            
                 print ("possible_customers: "), (possible_customers)
@@ -232,7 +233,10 @@ class AntColony(object):
                         print ("Tau: "), (prob_formula)
                         print ("first max_pheromone"), (max_pheromone) 
 
-                        if  max_pheromone < prob_formula:
+                        if max_pheromone is -1:
+                            max_pheromone = prob_formula
+                            next_customer = customer
+                        elif  max_pheromone < prob_formula:
                             max_pheromone = prob_formula
                             next_customer = customer 
                             print ("second max_pheromone"), (max_pheromone)
@@ -240,7 +244,12 @@ class AntColony(object):
                         else: continue  # 
                     else: print "Lets play roulette instead!"
                             #self._unvisted_customers.remove(customer) # kanska ska ta bort .self 
-                    
+                ant.capacity = ant.capacity - self._graph.node[next_customer]['demand']
+                ant.update_solution(next_customer)
+                self._unvisted_customers.remove(next_customer)
+                print "New Ant capacity is: {0}".format(ant.capacity)
+                
+
                 return [ant_coord,customer_coord,edge_pheromone,dist, next_customer]  
             return 0
             
