@@ -218,7 +218,6 @@ class AntColony(object):
             soln = ant.get_solution()
             possible_customers = []
             best_customer = None
-            max_pheromone = -1 
             
             while len(self._unvisted_customers) != 0: 
                 for customer in self._unvisted_customers: 
@@ -227,10 +226,18 @@ class AntColony(object):
                     else: possible_customers.append(customer)            
                 print ("possible_customers: "), (possible_customers)
 
+                if not possible_customers:
+                    break
+
+                # We need to reset the max pheromone values and next customer for each iteration over possible customers
+                next_customer = None
+                max_pheromone = -1 
                 for customer in possible_customers:
                     #print ("Customer nr: "),(customer)
                     #print ("Customer's demand: "), (self._graph.node[customer]['demand'])
                     ant_pos = ant.get_current_position()
+                    print self._graph
+                    print(ant_pos)
                     edge_pheromone = self._graph[ant_pos][customer]['pheromone']
                     customer_coord = self._graph.node[customer]['coord']
                     ant_coord = self._graph.node[ant_pos]['coord']
@@ -248,10 +255,14 @@ class AntColony(object):
                             max_pheromone = prob_formula
                             next_customer = customer 
                         else: continue  
-                    else: print "Lets play roulette instead!"
+                    else: 
+                        print "Lets play roulette instead!"
+                        next_customer = customer # THIS IS TEMPORARY SO IT DOESN'T FAIL
+                print("Next customer is: {0}".format(customer))
                 ant.capacity = ant.capacity - self._graph.node[next_customer]['demand']
                 ant.update_solution(next_customer)
                 self._unvisted_customers.remove(next_customer)
+                possible_customers = []
                 print "New Ant capacity is: {0}".format(ant.capacity)     
             
             
