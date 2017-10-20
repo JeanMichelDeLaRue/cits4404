@@ -227,6 +227,8 @@ class AntColony(object):
                 print ("possible_customers: "), (possible_customers)
 
                 if not possible_customers:
+                    # send the ant home! 
+                    ant.update_solution('depot')
                     break
 
                 # We need to reset the max pheromone values and next customer for each iteration over possible customers
