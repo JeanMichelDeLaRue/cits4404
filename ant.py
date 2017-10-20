@@ -262,7 +262,7 @@ class AntColony(object):
                 ant.capacity = ant.capacity - self._graph.node[next_customer]['demand']
                 ant.update_solution(next_customer)
                 self._unvisted_customers.remove(next_customer)
-                possible_customers = []
+                possible_customers = [] # Need to reset the possible customers too, other wise we keep adding to the same list!
                 print "New Ant capacity is: {0}".format(ant.capacity)     
             
             
