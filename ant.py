@@ -189,9 +189,15 @@ class AntColony(object):
         c1x,c1y = c1
         c2x,c2y = c2
 
-        dist = math.sqrt(pow((c2x-c1x),2) + pow((c2y-c1y),2))
-
+        dist = math.sqrt(pow((c1x-c2x),2) + pow((c1y-c2y),2))
+        print dist
         return int(dist)
+
+    def roullette_wheel(self):
+        """
+
+        """        
+        return -1
 
     def run(self):
         if not self._colony:
@@ -227,7 +233,7 @@ class AntColony(object):
                     dist = self.distance(ant_coord,customer_coord) 
                     q = random.random() 
 
-                    if q < self._q0:
+                   if q < self._q0:
                         print ("This is q: "), (q), ("compared to q0: "), (self._q0)
                         prob_formula = pow(edge_pheromone, self._alpha) * pow(1/float(dist), self._beta) 
                         print ("Tau: "), (prob_formula)
@@ -253,6 +259,7 @@ class AntColony(object):
                 return [ant_coord,customer_coord,edge_pheromone,dist, next_customer]  
             return 0
             
+
 
 
 if __name__ == "__main__": 

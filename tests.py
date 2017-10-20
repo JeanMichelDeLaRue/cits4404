@@ -48,6 +48,18 @@ class TestAntColonyMethods(unittest.TestCase):
         self.assertFalse(retval is 7)
         self.assertTrue(retval is 5)
 
+        c1 = (45,60)
+        c2 = (-45,60)
+
+        retval = self.aco.distance(c1,c2)
+        self.assertTrue(retval is 90)
+        c1 = (45,60)
+        c2 = (-45,-60)
+
+        retval = self.aco.distance(c1,c2)
+        self.assertTrue(retval is 150)
+
+
     def testCustomerDistance(self):
         graph = self.aco._init_graph()
         customers = self.aco._unvisted_customers
