@@ -60,7 +60,7 @@ class Ant(object):
 class AntColony(object):
     def __init__(self,num_ants=5,alpha=1, beta=0.1,graph_file=None):
         self._graph = None
-        self._iteration = 1
+        self._iteration = 2
         self._ants = num_ants
         self._colony = []
         self._depot = (-1,0)
@@ -207,11 +207,15 @@ class AntColony(object):
             self._init_graph()
             print("Successfully initialised graph")
 
-        for ant in self._colony:
-            
+        iteration_counter = 0
+        if iteration_counter < self._iteration:
+            self.do_next_iteration()
+            iteration_counter = iteration_counter + 1 
+
+    def do_next_iteration(self):
+
+        for ant in self._colony:       
             soln = ant.get_solution()
-            # max_capacity = 10 # FIXA till detta sa du hamtar fran dar uppe! 
-            # ant_capacity = max_capacity # galler for forsta iterationen, andra detta sa det hamtas fran andra capaciteten
             possible_customers = []
             best_customer = None
             max_pheromone = -1 
@@ -219,13 +223,13 @@ class AntColony(object):
             while len(self._unvisted_customers) != 0: 
                 for customer in self._unvisted_customers: 
                     if self._graph.node[customer]['demand'] > ant.capacity:
-                        continue # This will skip this customer and go back to the for loop until we find a customer
+                        continue 
                     else: possible_customers.append(customer)            
                 print ("possible_customers: "), (possible_customers)
 
                 for customer in possible_customers:
-                    print ("Customer nr: "),(customer)
-                    print ("Customer's demand: "), (self._graph.node[customer]['demand'])
+                    #print ("Customer nr: "),(customer)
+                    #print ("Customer's demand: "), (self._graph.node[customer]['demand'])
                     ant_pos = ant.get_current_position()
                     edge_pheromone = self._graph[ant_pos][customer]['pheromone']
                     customer_coord = self._graph.node[customer]['coord']
@@ -233,34 +237,24 @@ class AntColony(object):
                     dist = self.distance(ant_coord,customer_coord) 
                     q = random.random() 
 
-                   if q < self._q0:
-                        print ("This is q: "), (q), ("compared to q0: "), (self._q0)
+                    if q < self._q0:
+                        #print ("This is q: "), (q), ("compared to q0: "), (self._q0)
                         prob_formula = pow(edge_pheromone, self._alpha) * pow(1/float(dist), self._beta) 
-                        print ("Tau: "), (prob_formula)
-                        print ("first max_pheromone"), (max_pheromone) 
-
+                        #print ("Tau: "), (prob_formula)
                         if max_pheromone is -1:
                             max_pheromone = prob_formula
                             next_customer = customer
                         elif  max_pheromone < prob_formula:
                             max_pheromone = prob_formula
                             next_customer = customer 
-                            print ("second max_pheromone"), (max_pheromone)
-                            print ("I picked this customer randomly"), (next_customer)
-                        else: continue  # 
+                        else: continue  
                     else: print "Lets play roulette instead!"
-                            #self._unvisted_customers.remove(customer) # kanska ska ta bort .self 
                 ant.capacity = ant.capacity - self._graph.node[next_customer]['demand']
                 ant.update_solution(next_customer)
                 self._unvisted_customers.remove(next_customer)
-                print "New Ant capacity is: {0}".format(ant.capacity)
-                
-
-                return [ant_coord,customer_coord,edge_pheromone,dist, next_customer]  
-            return 0
+                print "New Ant capacity is: {0}".format(ant.capacity)     
             
-
-
+            
 
 if __name__ == "__main__": 
     aco = AntColony(10)
