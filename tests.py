@@ -72,11 +72,18 @@ class TestAntColonyMethods(unittest.TestCase):
         self.assertTrue(graph.node['1']['coord'][0] is 40)
         self.assertTrue(graph.node['1']['coord'][1] is 50)
         self.assertTrue(graph.node['92']['demand'] is 10)
+        self.assertTrue(graph['1']['2']['pheromone'] is 5)
 
     def testRun(self):
         ret_list = self.aco.run()
         print ret_list
 
     def testRoulette(self):
-        graph = self.aco._init_graph()
+        graph = self.aco.csv_parser('example.csv')
         self.aco.run()
+
+    def testDecay(self):
+        graph = self.aco.csv_parser('example.csv')
+        for edge in graph.edges():
+            self.aco.pheromone_decay(edge)
+            print graph[edge[0]][edge[1]]['pheromone']
