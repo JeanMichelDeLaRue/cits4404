@@ -60,12 +60,12 @@ class Ant(object):
 class AntColony(object):
     def __init__(self,num_ants=5,alpha=1, beta=0.1,graph_file=None):
         self._graph = None
-        self._iteration = 2
+        self._iteration = 1
         self._ants = num_ants
         self._colony = []
         self._depot = (-1,0)
 
-        self._q0 = 0.9 # most of the time, we use the pheromone
+        self._q0 = 1.0 # most of the time, we use the pheromone
         self._alpha = alpha
         self._beta = beta
         self._pheromone_decay = 0.8
@@ -193,11 +193,33 @@ class AntColony(object):
         print dist
         return int(dist)
 
-    def roullette_wheel(self):
+    def roullette_wheel(self,possible_customers,ant_pos,q):
         """
-
+        Create a roulette wheel of unvisted cities
+        Spin the wheel, then pick based on the probabilities
         """        
-        return -1
+        # Possible customers is a list of customers we can serve
+
+        total_dist = 0
+        probabilities = dict()
+        for customer in possible_customers:
+            customer_coord = self._graph.node[customer]['coord']
+            edge_pheromone = self._graph[ant_pos][customer]['pheromone']
+            ant_coord = self._graph.node[ant_pos]['coord']
+            dist = self.distance(ant_coord,customer_coord) 
+            prob_formula = pow(edge_pheromone, self._alpha) * pow(1/float(dist), self._beta)
+            total_dist = total_dist + prob_formula
+            probabilities[customer] = prob_formula
+
+        tmp = 0
+        for customer in probabilities:
+            probabilities[customer] = probabilities[customer]/total_dist + tmp
+            tmp = probabilities[customer]
+            if q < tmp:
+                return customer
+
+        return cust_probabilities
+        
 
     def run(self):
         if not self._colony:
@@ -210,6 +232,8 @@ class AntColony(object):
         iteration_counter = 0
         if iteration_counter < self._iteration:
             self.do_next_iteration()
+            # edge_pheromone = (1-self._alpha)*edge_pheromone + self._alpha*pow(dist, -1)
+
             iteration_counter = iteration_counter + 1 
 
     def do_next_iteration(self):
@@ -259,7 +283,8 @@ class AntColony(object):
                         else: continue  
                     else: 
                         print "Lets play roulette instead!"
-                        next_customer = customer # THIS IS TEMPORARY SO IT DOESN'T FAIL
+                        next_customer =self.roullette_wheel(possible_customers,ant.get_current_position(),q)
+
                 print("Next customer is: {0}".format(customer))
                 ant.capacity = ant.capacity - self._graph.node[next_customer]['demand']
                 ant.update_solution(next_customer)

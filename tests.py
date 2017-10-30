@@ -77,3 +77,6 @@ class TestAntColonyMethods(unittest.TestCase):
         ret_list = self.aco.run()
         print ret_list
 
+    def testRoulette(self):
+        graph = self.aco._init_graph()
+        self.aco.run()
