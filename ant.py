@@ -293,7 +293,7 @@ class AntColony(object):
         if iteration_counter < self._iteration:
             self.do_next_iteration()
             ### Local pheromone decay
-            for edge in graph.edges():
+            for edge in self._graph.edges():
                 self.pheromone_decay(edge)
             
             for ant in self._colony:
@@ -301,7 +301,7 @@ class AntColony(object):
                 ### append the ant solution to the a local solution, calculate the distance, and comapre it to the best global solution
                 ### Then update graph with the edges in the ant solution
 
-            edge_pheromone = (1-self._alpha)*edge_pheromone + self._alpha*pow(dist, -1)
+            # edge_pheromone = (1-self._alpha)*edge_pheromone + self._alpha*pow(dist, -1)
             # Go to the next iteration if we can
             iteration_counter = iteration_counter + 1 
 
