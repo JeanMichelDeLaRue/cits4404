@@ -10,10 +10,21 @@ from ant import Ant, AntColony
 
 class TestAntMethods(unittest.TestCase):
     def setUp(self):
-        return -1   
+        self.ant = Ant(1)
+        
 
     def tearDown(self):
         return -1
+
+    def testGetSolution(self):
+        self.ant.update_solution('1')
+        print self.ant._solution.edges()
+        # self.ant.update_solution('2')
+        # print self.ant._solution.edges()
+        self.ant.update_solution('depot')
+        print self.ant._solution.edges()    
+
+
 
 class TestAntColonyMethods(unittest.TestCase):
     def setUp(self):
@@ -86,4 +97,4 @@ class TestAntColonyMethods(unittest.TestCase):
         graph = self.aco.csv_parser('example.csv')
         for edge in graph.edges():
             self.aco.pheromone_decay(edge)
-            print graph[edge[0]][edge[1]]['pheromone']
+            print graph[edge[0]][edge[1]]['pheromone'] 

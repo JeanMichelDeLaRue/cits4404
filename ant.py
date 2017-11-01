@@ -22,35 +22,31 @@ class Ant(object):
 
     def __init__(self,id, depot=(0,0),capactiy=10):
         self._id = id
-        self._solution = nx.Graph() # This is an empty graph
+        self._solution = nx.DiGraph() # This is an empty graph
         self._depot = depot
         self._current = None
         self.capacity =  10
+
+        self._solution.add_node('depot')
+        self._current='depot'
 
     def __repr__(self):
         return self._id
 
 
     def get_solution(self):
-        return self._solution  
+        return self._solution.edges() 
     
-
     def update_solution(self, next_customer):
         # Initialise the graph and add the depot to it; this should always happen the first time.
-        if not self._solution:
-            self._solution = nx.Graph()
-            self._solution.add_node(self._depot)
-            self._current = self._depot
 
         self._solution.add_node(next_customer)
+        print next_customer
         self._solution.add_edge(self._current,next_customer) 
         self._current = next_customer
         
 
     def get_current_position(self):
-        if not self._current:
-            return 'depot'
-
         return self._current
 
     def fitness_selection(self):
@@ -60,18 +56,18 @@ class Ant(object):
 class AntColony(object):
     def __init__(self,num_ants=5,alpha=0.7, beta=0.1,graph_file=None):
         self._graph = None
-        self._iteration = 1
+        self._iteration = 2
         self._ants = num_ants
         self._colony = []
         self._depot = (-1,0)
 
         self._init_pheromone = 5
-        self._q0 = 1.0 # most of the time, we use the pheromone
+        self._q0 = 0.5 # most of the time, we use the pheromone
         self._alpha = alpha
         self._beta = beta
         self._unvisted_customers = None        
         self._best_solution = None
-        self._best_solution_dist = 0
+        self._best_solution_dist = -1
 
     def _init_ants(self):
         """
@@ -101,7 +97,7 @@ class AntColony(object):
         self._graph = nx.Graph()
         self._graph.add_nodes_from([1,2,3,4]) 
         coords = [(45,60),(-45,60),(45,-60),(-45,-60)]
-        demand = [4,5,12,7]
+        demand = [4,5,5,7]
         for x in range(1,5):
             self._graph.node[x]['coord']=coords[x-1]
             self._graph.node[x]['demand'] = demand[x-1]
@@ -165,18 +161,21 @@ class AntColony(object):
             for other_node in self._graph:
                 if other_node is not node:
                     self._graph.add_edge(node,other_node,pheromone=5)
-
         
         return self._graph
 
 
 
 
-    def global_pheromone_update(self):
+    def global_pheromone_update(self,edges,local_dist):
         """
         This function decays the pheromones on the trail
         """
-        return -1 
+        for edge in edges:
+            edge_pheromone = self._graph[edge[0]][edge[1]]['pheromone']
+            self._graph[edge[0]][edge[1]]['pheromone'] = (1-self._alpha)*edge_pheromone + self._alpha*local_dist
+
+        return 0
 
     def distance(self, c1, c2):
         """
@@ -189,12 +188,12 @@ class AntColony(object):
         c2x,c2y = c2
 
         dist = math.sqrt(pow((c1x-c2x),2) + pow((c1y-c2y),2))
-        print dist
+        # print dist
         return int(dist)
 
     def pheromone_decay(self, edge):
         local_pheromone = self._graph[edge[0]][edge[1]]['pheromone'] 
-        self._graph[edge[0]][edge[1]]['pheromone'] = (1-self._alpha)*5 + self._alpha*self._init_pheromone
+        self._graph[edge[0]][edge[1]]['pheromone'] = (1-self._alpha)*local_pheromone + self._alpha*self._init_pheromone
         return 1
 
     def roullette_wheel(self,possible_customers,ant_pos,q):
@@ -227,32 +226,31 @@ class AntColony(object):
     def do_next_iteration(self):
 
         for ant in self._colony:       
-            soln = ant.get_solution()
             possible_customers = []
             best_customer = None
             
-            while len(self._unvisted_customers) != 0: 
+            go_home = False
+            while len(self._unvisted_customers) > 0:
+                if go_home:
+                    break
                 for customer in self._unvisted_customers: 
-                    print customer
                     if self._graph.node[customer]['demand'] > ant.capacity:
                         continue 
-                    else: possible_customers.append(customer)            
-                print ("possible_customers: "), (possible_customers)
+                    else: 
+                        possible_customers.append(customer)            
 
                 if not possible_customers:
-                    # send the ant home! 
+                    # send the ant home!
                     ant.update_solution('depot')
+                    go_home = True
                     break
 
                 # We need to reset the max pheromone values and next customer for each iteration over possible customers
                 next_customer = None
                 max_pheromone = -1 
                 for customer in possible_customers:
-                    #print ("Customer nr: "),(customer)
-                    #print ("Customer's demand: "), (self._graph.node[customer]['demand'])
                     ant_pos = ant.get_current_position()
                     print self._graph
-                    print(ant_pos)
                     edge_pheromone = self._graph[ant_pos][customer]['pheromone']
                     customer_coord = self._graph.node[customer]['coord']
                     ant_coord = self._graph.node[ant_pos]['coord']
@@ -260,26 +258,25 @@ class AntColony(object):
                     q = random.random() 
 
                     if q < self._q0:
-                        #print ("This is q: "), (q), ("compared to q0: "), (self._q0)
                         prob_formula = pow(edge_pheromone, self._alpha) * pow(1/float(dist), self._beta) 
-                        #print ("Tau: "), (prob_formula)
                         if max_pheromone is -1:
                             max_pheromone = prob_formula
                             next_customer = customer
                         elif  max_pheromone < prob_formula:
                             max_pheromone = prob_formula
                             next_customer = customer 
-                        else: continue  
                     else: 
                         print "Lets play roulette instead!"
                         next_customer =self.roullette_wheel(possible_customers,ant.get_current_position(),q)
 
-                print("Next customer is: {0}".format(customer))
                 ant.capacity = ant.capacity - self._graph.node[next_customer]['demand']
                 ant.update_solution(next_customer)
                 self._unvisted_customers.remove(next_customer)
                 possible_customers = [] # Need to reset the possible customers too, other wise we keep adding to the same list!
-                print "New Ant capacity is: {0}".format(ant.capacity)     
+
+            if len(self._unvisted_customers) is 0:
+                ant.update_solution('depot')
+                return 0
             
     def run(self):
         if not self._colony:
@@ -288,23 +285,49 @@ class AntColony(object):
         if not self._graph:
             self._init_graph()
             print("Successfully initialised graph")
-        # print self._graph.node['1']['demand']
         iteration_counter = 0
-        if iteration_counter < self._iteration:
+        while iteration_counter < self._iteration:
             self.do_next_iteration()
             ### Local pheromone decay
             for edge in self._graph.edges():
                 self.pheromone_decay(edge)
             
+            local_dist = 0
+            local_solution = []
             for ant in self._colony:
-                print ant.get_solution()
-                ### append the ant solution to the a local solution, calculate the distance, and comapre it to the best global solution
-                ### Then update graph with the edges in the ant solution
+                edges = ant.get_solution()
+                # print "ant solution" + str(edges)
+                ant_dist = 0
+                for edge in edges:
+                    c1 = self._graph.node[edge[0]]['coord']
+                    c2 = self._graph.node[edge[1]]['coord']
+                    ant_dist = ant_dist + self.distance(c1,c2)
 
-            # edge_pheromone = (1-self._alpha)*edge_pheromone + self._alpha*pow(dist, -1)
-            # Go to the next iteration if we can
+                local_dist = local_dist+ant_dist
+                local_solution.append(edges)
+                self.global_pheromone_update(edges,local_dist)
+
+            
+            # update the pheromones only on the local solution
+
+            if self._best_solution_dist is -1:
+                self._best_solution_dist = local_dist
+                self._best_solution = local_solution
+
+            elif self._best_solution_dist > local_dist:
+                self._best_solution_dist = local_dist
+                self._best_solution = local_solution
+
+            # Reset the colony and graphs (Kind of hack-y but c'est la vis)
+            self._colony = []
+            self._init_ants()
+
+            self._graph = None
+            self._init_graph()
+            print self._best_solution
+            print self._best_solution_dist
+
             iteration_counter = iteration_counter + 1 
-
 
             
 
