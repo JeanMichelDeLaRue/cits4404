@@ -28,7 +28,7 @@ class TestAntMethods(unittest.TestCase):
 
 class TestAntColonyMethods(unittest.TestCase):
     def setUp(self):
-        self.aco = AntColony(15) 
+        self.aco = AntColony(100) 
 
     def tearDown(self):
         return -1
@@ -84,6 +84,7 @@ class TestAntColonyMethods(unittest.TestCase):
         self.assertTrue(graph.node['1']['coord'][1] is 50)
         self.assertTrue(graph.node['92']['demand'] is 10)
         self.assertTrue(graph['1']['2']['pheromone'] is 5)
+        # self.assertTrue(graph['1'][])
 
     def testRun(self):
         ret_list = self.aco.run()
