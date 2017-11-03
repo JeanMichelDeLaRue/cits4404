@@ -28,7 +28,7 @@ class TestAntMethods(unittest.TestCase):
 
 class TestAntColonyMethods(unittest.TestCase):
     def setUp(self):
-        self.aco = AntColony(100) 
+        self.aco = AntColony(5) 
 
     def tearDown(self):
         return -1
@@ -88,7 +88,7 @@ class TestAntColonyMethods(unittest.TestCase):
 
     def testRun(self):
         ret_list = self.aco.run()
-        print ret_list
+        # print ret_list
 
     def testRoulette(self):
         graph = self.aco.csv_parser('example.csv')
@@ -99,3 +99,8 @@ class TestAntColonyMethods(unittest.TestCase):
         for edge in graph.edges():
             self.aco.pheromone_decay(edge)
             print graph[edge[0]][edge[1]]['pheromone'] 
+
+    def testResetCustomers(self):
+        graph = self.aco._init_graph()
+        self.aco.reset_unvisted_customers()
+        print self.aco._unvisted_customers
