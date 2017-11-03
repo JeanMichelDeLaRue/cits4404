@@ -59,15 +59,16 @@ class Ant(object):
 
 
 class AntColony(object):
-    def __init__(self,num_ants=5,alpha=0.5, beta=0.5,graph_file=None):
+    def __init__(self,num_ants=5,alpha=0.5, beta=0.5,iteration=5,q_zero=0.8,graph_file=None):
         self._graph = None
-        self._iteration = 10
+        self._iteration = iteration
         self._ants = num_ants
         self._colony = []
         self._depot = (-1,0)
+        self._graph_file = graph_file
 
         self._init_pheromone = 1/float(300)
-        self._q0 = 0.8 # most of the time, we use the pheromone
+        self._q0 = q_zero # most of the time, we use the pheromone
         self._alpha = alpha
         self._beta = beta
         self._unvisted_customers = None        
@@ -165,7 +166,7 @@ class AntColony(object):
         for node in self._graph:
             for other_node in self._graph:
                 if other_node is not node:
-                    self._graph.add_edge(node,other_node,pheromone=5)
+                    self._graph.add_edge(node,other_node,pheromone=self._init_pheromone)
         
         return self._graph
 
@@ -201,7 +202,7 @@ class AntColony(object):
 
     def pheromone_decay(self, edge):
         local_pheromone = self._graph[edge[0]][edge[1]]['pheromone'] 
-        self._graph[edge[0]][edge[1]]['pheromone'] = (1-self._alpha)*local_pheromone + self._alpha*self._init_pheromone
+        self._graph[edge[0]][edge[1]]['pheromone'] = (1-self._alpha)*local_pheromone + self._alpha*5
         # print self._graph[edge[0]][edge[1]]['pheromone']
         return 1
 
@@ -247,10 +248,10 @@ class AntColony(object):
         self._unvisted_customers.remove('depot')
 
     def do_next_iteration(self):
-        print self._ants
+        # print self._ants
 
         for ant in self._colony:   
-            print "Ant{0}".format(ant)
+            # print "Ant{0}".format(ant)
             self.reset_unvisted_customers()
             possible_customers = []
             best_customer = None
@@ -301,9 +302,9 @@ class AntColony(object):
                 # print "we get here"
             
                 if len(self._unvisted_customers) is 0:
-                    print "we never get here"
+                    # print "we never get here"
                     ant.update_solution('depot')
-                    print ant.get_solution()
+                    # print ant.get_solution()
 
 
 
@@ -311,10 +312,10 @@ class AntColony(object):
     def run(self):
         if not self._colony:
             self._init_ants()
-            print("Successfully initialised ants")
+            # print("Successfully initialised ants")
         if not self._graph:
-            self.csv_parser('example2.csv')
-            print("Successfully initialised graph")
+            self.csv_parser('example_50.csv')
+            # print("Successfully initialised graph")
         iteration_counter = 0
         while iteration_counter < self._iteration:
             # print self._graph.nodes()
@@ -325,28 +326,28 @@ class AntColony(object):
                 edges = ant.get_solution()
                 # print "ant solution" + str(edges)
                 ant_dist = 0
-                for edge in edges:
+                for edge in edges:  
                     c1 = self._graph.node[edge[0]]['coord']
                     c2 = self._graph.node[edge[1]]['coord']
                     ant_dist = ant_dist + self.distance(c1,c2)
 
-                print "ant dist:" + str(ant_dist)
+                # print "ant dist:" + str(ant_dist)
                 if local_maxima is -1:
                     local_maxima = ant_dist
                     local_solution = edges
-                    print ant_dist
-                    print("Local solution initialised for iteration {0}".format(iteration_counter))
+                    # print ant_dist
+                    # print("Local solution initialised for iteration {0}".format(iteration_counter))
 
                 elif local_maxima > ant_dist:
                     local_maxima = ant_dist
                     local_solution = edges
-                    print("Best solution changed to ant {0}".format(ant))
-                    print(local_maxima)
+                    # print("Best solution changed to ant {0}".format(ant))
+                    # print(local_maxima)
 
             # Local pheromone decay
             for edge in self._graph.edges():
                 self.pheromone_decay(edge)
-                print self._graph[edge[0]][edge[1]]['pheromone'] 
+                # print self._graph[edge[0]][edge[1]]['pheromone'] 
 
             
             
@@ -355,39 +356,33 @@ class AntColony(object):
                 for edge in ant.get_solution():
                     if edge in local_solution:
                         updateable_edges.append(edge)
-
+                # print updateable_edges
                 self.global_pheromone_update(updateable_edges,local_maxima)    
 
-            for edge in self._graph.edges():
-                print self._graph[edge[0]][edge[1]]['pheromone']
+            # for edge in self._graph.edges():
+            #     print self._graph[edge[0]][edge[1]]['pheromone']
             # update the pheromones only on the local solution
 
             if self._best_solution_dist is -1:
                 self._best_solution_dist = local_maxima
                 self._best_solution = local_solution
-                print("Best solution initialised")
 
             elif self._best_solution_dist > local_maxima:
                 self._best_solution_dist = local_maxima
                 self._best_solution = local_solution
-                print("best solution changed")
-                print(self._best_solution_dist)
 
             # Reset the colony and graphs (Kind of hack-y but c'est la vis)
             self._colony = []
             self._init_ants()
 
             self._graph = None
-            self.csv_parser('example2.csv')
-            print self._best_solution 
-            print self._best_solution_dist
+            self.csv_parser('example_50.csv')
 
             iteration_counter = iteration_counter + 1 
-            
 
-if __name__ == "__main__": 
-    aco = AntColony(100)
-    aco.run()
+        # Itertions,Alpha,Beta,Customers, q0,Best Solution
+        print("{4},{0},{1},{2},{5},{3}".format(self._alpha, self._beta, len(self._graph.nodes())-1, self._best_solution_dist,self._iteration,self._q0))
+            
  
 
 
